@@ -2,7 +2,9 @@ const HIGH_SCORE_KEY = "HIGH_SCORE";
 const _BASE_SIZE = 20;
 const PLAYERS_NUMBERS = 2;
 const _DIRECTION_BUFFER = ["d"];
+const _DIRECTION_BUFFER_SECOND_PLAYER = ["ArrowRight"];
 let _DIRECTION = "d";
+let _DIRECTION_SECOND_PLAYER = "ArrowRight";
 let _SHOW_GRID = true;
 let ELAPSED_TIME_IN_SECONDS = 0;
 let _GAME_OVER = false;
@@ -20,12 +22,20 @@ const _DO_MOVEMENT_VECTOR = {
   s: [0, 1],
   a: [-1, 0],
   d: [1, 0],
+  ArrowUp: [0, -1],
+  ArrowDown: [0, 1],
+  ArrowLeft: [-1, 0],
+  ArrowRight: [1, 0],
 };
 const _BLOCK_MOVEMENTS = {
   w: "s",
   s: "w",
   a: "d",
   d: "a",
+  ArrowUp: "ArrowDown",
+  ArrowDown: "ArrowUp",
+  ArrowLeft: "ArrowRight",
+  ArrowRight: "ArrowLeft",
 };
 
 // Faz o Bind Do movimento e bloqueia movimento contrário
@@ -55,31 +65,34 @@ const init = () => {
   canvas.height = _BASE_SIZE * Math.floor(window.innerHeight / _BASE_SIZE);
   const positions = generateAllGridPositions(canvas);
   const ctx = canvas.getContext("2d");
-  const headPosition = randomPosition(positions);
   // TODO - Adicionar escolha de quantidade de cobras (Mockado por enquanto)
   var snakes = [];
   for (let i = 0; i < PLAYERS_NUMBERS; i++) {
+    const headPosition = randomPosition(positions);
     snakes[i] = [
       snakePartFactory(headPosition.x + _BASE_SIZE * 2, headPosition.y),
       snakePartFactory(headPosition.x + _BASE_SIZE, headPosition.y),
       snakePartFactory(headPosition.x, headPosition.y),
     ];
   }
-  const foodPosition = randomSafePosition(positions, snake);
+  const foodPosition = randomSafePosition(positions, snakes);
   const foods = [foodFactory(foodPosition.x, foodPosition.y)];
   _HIGH_SCORE = parseInt(window.localStorage.getItem(HIGH_SCORE_KEY), 10);
-  loop(snake, foods, positions, canvas, ctx).then(() => {
+  loop(snakes, foods, positions, canvas, ctx).then(() => {
     console.log("snake started");
-    startGameTimer(foods, snake, positions);
+    startGameTimer(foods, snakes, positions);
   });
 };
 
-const loop = async (snake, foods, positions, canvas, ctx) => {
-  update(snake, foods, positions, canvas);
-  render(snake, foods, canvas, ctx);
+const loop = async (snakes, foods, positions, canvas, ctx) => {
+  snakes.forEach((snake) => {
+    update(snake, foods, positions, canvas);
+    render(snake, foods, canvas, ctx);
+  });
+  // ---------------------
   await delay(_CURRENT_DELAY);
   window.requestAnimationFrame(() =>
-    loop(snake, foods, positions, canvas, ctx)
+    loop(snakes, foods, positions, canvas, ctx)
   );
 };
 
