@@ -4,33 +4,127 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover"
     />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta name="theme-color" content="#222222" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
     <title>Top Snake</title>
     <style>
       * {
         margin: 0;
         padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        /* espaco reservado para o d-pad; zero em dispositivos com mouse */
+        --controls-height: 0px;
+        --gap: 12px;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        overscroll-behavior: none;
       }
       body {
-        position: relative;
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden;
         background-color: #222;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--gap);
+        padding: 8px;
+        padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+        font-family: system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+        /* impede scroll, pull-to-refresh e zoom por duplo toque */
+        touch-action: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        user-select: none;
       }
       #canvas {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
+        display: block;
+        background-color: black;
+        /* resolucao interna continua 600x600; o CSS so escala pra caber na tela */
+        width: min(
+          100vw - 16px,
+          100vh - var(--controls-height) - var(--gap) - 16px,
+          600px
+        );
+        height: auto;
+        aspect-ratio: 1 / 1;
+        touch-action: none;
+      }
+      #touch-controls {
+        display: none;
+        grid-template-columns: repeat(3, 68px);
+        grid-template-rows: repeat(3, 52px);
+        gap: 8px;
+        touch-action: none;
+      }
+      .pad {
+        -webkit-appearance: none;
+        appearance: none;
+        border: 1px solid rgba(105, 240, 174, 0.35);
+        border-radius: 12px;
+        background-color: rgba(105, 240, 174, 0.1);
+        color: #69f0ae;
+        font-size: 22px;
+        line-height: 1;
+        touch-action: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .pad:active {
+        background-color: rgba(105, 240, 174, 0.3);
+      }
+      .pad[data-dir="w"] {
+        grid-area: 1 / 2;
+      }
+      .pad[data-dir="a"] {
+        grid-area: 2 / 1;
+      }
+      .pad[data-dir="d"] {
+        grid-area: 2 / 3;
+      }
+      .pad[data-dir="s"] {
+        grid-area: 3 / 2;
+      }
+
+      /* so mostra o d-pad em telas de toque */
+      @media (pointer: coarse) {
+        :root {
+          --controls-height: 172px;
+        }
+        #touch-controls {
+          display: grid;
+        }
+      }
+      /* paisagem em telefone: d-pad ao lado do tabuleiro */
+      @media (pointer: coarse) and (orientation: landscape) {
+        :root {
+          --controls-height: 0px;
+        }
+        body {
+          flex-direction: row;
+        }
+        #canvas {
+          width: min(100vh - 16px, 100vw - 240px, 600px);
+        }
       }
     </style>
     <script src="/socket.io/socket.io.js"></script>
     <script defer type="module" src="/static/client.js"></script>
   </head>
   <body>
-    <canvas id="canvas" style="background-color: black"></canvas>
+    <canvas id="canvas" width="600" height="600"></canvas>
+    <div id="touch-controls">
+      <button class="pad" type="button" data-dir="w" aria-label="cima">▲</button>
+      <button class="pad" type="button" data-dir="a" aria-label="esquerda">◀</button>
+      <button class="pad" type="button" data-dir="d" aria-label="direita">▶</button>
+      <button class="pad" type="button" data-dir="s" aria-label="baixo">▼</button>
+    </div>
   </body>
 </html>
