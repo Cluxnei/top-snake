@@ -416,7 +416,10 @@ window.addEventListener("load", () => {
   bindTouch();
   loop();
 
-  socket = io();
+  // O prefixo sai da propria URL da pagina, entao o cliente funciona igual
+  // na raiz e sob /top-snake/ sem nada configurado em dois lugares.
+  const base = window.location.pathname.replace(/\/[^/]*$/, "");
+  socket = io({ path: `${base}/socket.io/` });
 
   socket.on("connect", () => {
     console.log("connected");

@@ -115,8 +115,10 @@
         }
       }
     </style>
-    <script src="/socket.io/socket.io.js"></script>
-    <script defer type="module" src="/static/client.js"></script>
+    <!-- Relativos de proposito: a pagina e servida tanto na raiz (dev) quanto
+         sob um prefixo (producao), e caminhos absolutos quebrariam no segundo. -->
+    <script src="socket.io/socket.io.js"></script>
+    <script defer type="module" src="static/client.js"></script>
   </head>
   <body>
     <canvas id="canvas" width="600" height="600"></canvas>
